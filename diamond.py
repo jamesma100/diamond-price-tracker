@@ -365,6 +365,6 @@ def output_prediction(carat, cut, color, clarity, depth, table, x, y, z):
 
     user_test_prepared = full_pipeline.transform(user_df)
     user_prediction = final_model.predict(user_test_prepared)
-    return user_prediction
+    return user_prediction[0]
 
 print(output_prediction(0.21, 'Premium', 'E', 'SI1', 59.8, 61, 3.89, 3.84, 2.31))

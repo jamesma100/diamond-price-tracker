@@ -18,7 +18,7 @@ class DiamondForm(FlaskForm):
 
     clarity = SelectField('Clarity', validators=[DataRequired()], choices=[('I1', 'I1'), ('SI2',
                                                                         'SI2'), ('SI1', 'SI1'),
-                                                                           ('VS2', 'VS1'),
+                                                                           ('VS2', 'VS2'),
                                                                            ('VS1', 'VS1'),
                                                                            ('WS2', 'WS2'),
                                                                            ('WS1', 'WS1')])
