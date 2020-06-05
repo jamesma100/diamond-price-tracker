@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method='POST' action="/home" autocomplete="on">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Enter diamond attributes</legend>
+                <div class="form-row">
+                    <div class="form-group col-xs-4">
+                        {{ form.carat.label(class="form-control-label") }}
+                        {% if form.carat.errors %}
+                            {{ form.carat(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.carat.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.carat(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-xs-4">
+                        {{ form.cut.label(class="custom-select-label") }}
+                        {% if form.cut.errors %}
+                            {{ form.cut(class="custom-select-label form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.cut.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.cut(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-xs-4">
+                        {{ form.color.label(class="custom-select-label") }}
+                        {% if form.color.errors %}
+                            {{ form.color(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.color.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.color(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-xs-4">
+                        {{ form.clarity.label(class="custom-select-label") }}
+                        {% if form.clarity.errors %}
+                            {{ form.clarity(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.clarity.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.clarity(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-xs-4">
+                        {{ form.depth.label(class="form-control-label") }}
+                        {% if form.depth.errors %}
+                            {{ form.depth(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.depth.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.depth(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-xs-4">
+                        {{ form.table.label(class="form-control-label") }}
+                        {% if form.table.errors %}
+                            {{ form.table(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.table.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.table(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-xs-4">
+                        {{ form.x.label(class="form-control-label") }}
+                        {% if form.x.errors %}
+                            {{ form.x(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.x.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.x(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-xs-4">
+                        {{ form.y.label(class="form-control-label") }}
+                        {% if form.y.errors %}
+                            {{ form.y(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.y.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.y(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-xs-4">
+                        {{ form.z.label(class="form-control-label") }}
+                        {% if form.z.errors %}
+                            {{ form.z(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.z.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.z(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}
