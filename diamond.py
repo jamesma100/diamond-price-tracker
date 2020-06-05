@@ -348,7 +348,6 @@ np.sqrt(stats.t.interval(confidence, m-1,
                          loc=np.mean(squared_errors),
                          scale=stats.sem(squared_errors)))
 
-
 def output_prediction(carat, cut, color, clarity, depth, table, x, y, z):
     # create array from user data
     user_data = {'carat': [carat],
@@ -367,3 +366,5 @@ def output_prediction(carat, cut, color, clarity, depth, table, x, y, z):
     user_test_prepared = full_pipeline.transform(user_df)
     user_prediction = final_model.predict(user_test_prepared)
     return user_prediction
+
+print(output_prediction(0.21, 'Premium', 'E', 'SI1', 59.8, 61, 3.89, 3.84, 2.31))

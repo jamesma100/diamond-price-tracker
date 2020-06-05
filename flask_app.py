@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, flash, redirect, request
 from forms import DiamondForm
 app = Flask(__name__)
+import diamond
 
 app.config['SECRET_KEY'] = '3c566a4460dc4e71703b9cff8ea80c79'
 
@@ -36,9 +37,14 @@ posts = [
 def home():
     form = DiamondForm()
     if form.validate_on_submit():
+        price_prediction = diamond.output_prediction(form.carat.data, form.cut.data,
+                                                     form.color.data, form.clarity.data,
+                                                     form.depth.data, form.table.data,
+                                                     form.x.data, form.y.data, form.z.data)
+
         flash(f'Predicting the price of your {form.carat.data} carat diamond', 'success')
-        return redirect(url_for('results'))
-    return render_template('home.html', title='Home', form=form)
+        return render_template('results.html', price_prediction=price_prediction)
+    return render_template('home.html', form=form)
 
 @app.route('/about')
 def about():
@@ -46,7 +52,9 @@ def about():
 
 @app.route('/results')
 def results():
-    return render_template('results.html')
+    return render_template('results.html', 'carat', 'cut', 'color', 'clarity', 'depth', 'table',
+                           'x', 'y', 'z')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
