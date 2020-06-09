@@ -1,51 +1,61 @@
+'''
+- Full pipeline for preparing, training, and testing a machine learning model
+- Note on diamond attributes:
+    - price: price in US dollars
+    - carat: weight of diamond
+    - cut: quality of the cut
+    - color: diamond color J(worst) to D(best)
+    - clarity: measurement of how clear diamond is (I1(worst), SI2, SI1, VS2, VS1, VVS2, VVS1,
+    - 1F(best))
+    - x: length in mm
+    - y: width
+    - z: depth
+    - depth: total depth percentage (z/mean(x,y)) = 2 * x/(x+y)(43--79)
+    - table: width of top of diamond relative to widest point (43--95)
+'''
+
+
 import os
 import pandas as pd
 
 FILE_PATH = "datasets/diamonds"
 FILE_NAME = "diamonds.csv"
 
-
+# function to load csv file
 def load_diamonds_data(file_path= FILE_PATH):
     csv_path = os.path.join(file_path, FILE_NAME)
     return pd.read_csv(csv_path)
 
 
 diamonds = load_diamonds_data()
-diamonds.drop('Unnamed: 0', inplace=True, axis=1)
-
-# price: price in US dollars
-# carat: weight of diamond
-# cut: quality of the cut
-# color: diamond color J(worst) to D(best)
-# clarity: measurement of how clear diamond is (I1(worst), SI2, SI1, VS2, VS1, VVS2, VVS1,
-# 1F(best))
-# x: length in mm
-# y: width
-# z: depth
-# depth: total depth percentage (z/mean(x,y)) = 2 * x/(x+y)(43--79)
-# table: width of top of diamond relative to widest point (43--95)
-
+diamonds.drop('Unnamed: 0', inplace=True, axis=1) # reassign index column
 
 import numpy as np
 np.random.seed(42)
 
 from zlib import crc32
 
+
+# compute hash of each instance's identifier, ensuring test set will remain consistent
+# across multiple funs
 def test_set_check(identifier, test_ratio):
     return crc32(np.int64(identifier)) & 0xffffffff < test_ratio * 2**32
 
+
+# splits data set into training and testing sets given a ratio
 def split_train_test_by_id(data, test_ratio, id_column):
     ids = data[id_column]
     in_test_set = ids.apply(lambda id_: test_set_check(id_, test_ratio))
     return data.loc[~in_test_set], data.loc[in_test_set]
 
+
 diamonds_with_id = diamonds.reset_index()
 train_set, test_set = split_train_test_by_id(diamonds_with_id, 0.2, "index")
 
 from sklearn.model_selection import train_test_split
-train_set, test_set = train_test_split(diamonds, test_size=0.2, random_state=42)
 
-#print(len(train_set), "train +", len(test_set), "test")
+# defines training set and testing set
+train_set, test_set = train_test_split(diamonds, test_size=0.2, random_state=42)
 
 import numpy as np
 np.random.seed(42)
@@ -56,26 +66,29 @@ diamonds['carat_cat'] = pd.cut(diamonds['carat'],
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
+# use stratified sampling to keep proportions
 split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
 for train_index, test_index in split.split(diamonds, diamonds["carat_cat"]):
     strat_train_set = diamonds.loc[train_index]
     strat_test_set = diamonds.loc[test_index]
 
+
 for set in (strat_train_set, strat_test_set):
     set.drop(["carat_cat"], axis=1, inplace=True)
 
-#create copy of train set
+# create copy of train set
 diamonds = strat_train_set.copy()
 
 diamonds['volume'] = diamonds['x'] * diamonds['y'] * diamonds['z']
 corr_matrix = diamonds.corr()
 corr_matrix['price'].sort_values(ascending=False)
 
-#create copy of clean training set without labels
-#we don't want to apply transformations to target values
+# create copy of clean training set without labels
+# we don't want to apply transformations to target values
 diamonds = strat_train_set.drop("price", axis=1)
 diamond_labels = strat_train_set["price"].copy()
 
+# fill missing values with median values
 from sklearn.impute import SimpleImputer
 imputer = SimpleImputer(strategy="median")
 diamonds_num = diamonds.drop(['color', 'cut', 'clarity'], axis=1)
@@ -87,7 +100,7 @@ diamonds_tr = pd.DataFrame(X, columns=diamonds_num.columns, index=diamonds.index
 diamonds_tr = pd.DataFrame(X, columns=diamonds_num.columns, index=diamonds_num.index)
 # print(diamonds_tr.head())
 
-#transform the training set
+# transform the training set
 X = imputer.transform(diamonds_num)
 diamonds_tr = pd.DataFrame(X, columns=diamonds_num.columns, index=diamonds.index)
 
@@ -97,7 +110,6 @@ from sklearn.preprocessing import LabelEncoder
 encoder = LabelEncoder()
 diamonds_cut_cat = diamonds['cut']
 diamonds_cut_cat_encoded = encoder.fit_transform(diamonds_cut_cat)
-# print(diamonds_cut_cat_encoded)
 
 # transform text categories to integer categories then from integer categories to one-hot vectors
 from sklearn.preprocessing import LabelBinarizer
@@ -114,17 +126,17 @@ diamonds_cut_cat_encoded = ordinal_encoder.fit_transform(diamonds_cut_cat)
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
 
+# encode 'cut' attribute into one-hot vectors
 cut_cat_encoder = OneHotEncoder()
 diamonds_cut_cat_1hot = cut_cat_encoder.fit_transform(diamonds_cut_cat)
-
 diamonds_cut_cat_1hot.toarray()
-
 diamonds_cut_cat = diamonds[["cut"]]
 diamonds_cut_cat_encoded = ordinal_encoder.fit_transform(diamonds_cut_cat)
 cut_cat_encoder = OneHotEncoder()
 diamonds_cut_cat_1hot = cut_cat_encoder.fit_transform(diamonds_cut_cat)
 diamonds_cut_cat_1hot.toarray()
 
+# encode 'color' attribute into one-hot vectors
 ordinal_encoder = OrdinalEncoder()
 diamonds_color_cat = diamonds[["color"]]
 diamonds_color_cat_encoded = ordinal_encoder.fit_transform(diamonds_color_cat)
@@ -133,19 +145,21 @@ color_cat_encoder = OneHotEncoder()
 diamonds_color_cat_1hot = color_cat_encoder.fit_transform(diamonds_color_cat)
 diamonds_color_cat_1hot.toarray()
 
+# encode 'clarity' attribute into one-hot vectors
 diamonds_clarity_cat = diamonds[["clarity"]]
 diamonds_clarity_cat_encoded = ordinal_encoder.fit_transform(diamonds_clarity_cat)
 clarity_cat_encoder = OneHotEncoder()
 diamonds_clarity_cat_1hot = clarity_cat_encoder.fit_transform(diamonds_clarity_cat)
 diamonds_clarity_cat_1hot.toarray()
 
-#scikit-learn's FunctionTransformer class creates a transformer based on a transformation function
+# scikit-learn's FunctionTransformer class creates a transformer based on a transformation function
 from sklearn.base import BaseEstimator, TransformerMixin
 
 x_ix, y_ix, z_ix = [
     list(diamonds.columns).index(col)
     for col in ("x", "y", "z")]
 
+# Transformer class to add new 'volume' attribute = x * y * z
 class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
     def __init__(self, add_volume=True):
         self.add_volume = add_volume
@@ -167,6 +181,7 @@ class OldDataFrameSelector(BaseEstimator, TransformerMixin):
 from sklearn.preprocessing import FunctionTransformer
 
 
+# function to add new features
 def add_extra_features(X, add_volume=True):
     if add_volume:
         volume = X[:, x_ix] * X[:, y_ix] * X[:, z_ix]
@@ -180,9 +195,8 @@ diamonds_extra_attribs = pd.DataFrame(
     diamonds_extra_attribs,
     columns=list(diamonds.columns) + ['volume'],
     index=diamonds.index)
-# print(diamonds_extra_attribs.head())
 
-#build pipeline for processing numerical attributes
+# build pipeline for processing numerical attributes
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -234,7 +248,7 @@ old_diamonds_prepared = old_full_pipeline.fit_transform(diamonds)
 
 np.allclose(diamonds_prepared, old_diamonds_prepared)
 
-#Select and train a model
+# select and train a model
 from sklearn.linear_model import LinearRegression
 
 lin_reg = LinearRegression()
@@ -263,7 +277,7 @@ diamonds_predictions = tree_reg.predict(diamonds_prepared)
 tree_mse = mean_squared_error(diamond_labels, diamonds_predictions)
 tree_rmse = np.sqrt(tree_mse)
 
-# use cross validation
+# use cross validation to test accuracy
 from sklearn.model_selection import cross_val_score
 
 scores = cross_val_score(tree_reg, diamonds_prepared, diamond_labels, scoring="neg_mean_squared_error", cv=10)
@@ -288,7 +302,6 @@ forest_rmse = np.sqrt(forest_mse)
 forest_scores = cross_val_score(forest_reg, diamonds_prepared, diamond_labels,
                                 scoring="neg_mean_squared_error", cv=10)
 forest_rmse_scores = np.sqrt(-forest_scores)
-# display_scores(forest_rmse_scores)
 
 scores = cross_val_score(lin_reg, diamonds_prepared, diamond_labels, scoring="neg_mean_squared_error", cv=10)
 # pd.Series(np.sqrt(-scores)).describe()
@@ -367,4 +380,4 @@ def output_prediction(carat, cut, color, clarity, depth, table, x, y, z):
     user_prediction = final_model.predict(user_test_prepared)
     return user_prediction[0]
 
-print(output_prediction(0.21, 'Premium', 'E', 'SI1', 59.8, 61, 3.89, 3.84, 2.31))
+#print(output_prediction(0.21, 'Premium', 'E', 'SI1', 59.8, 61, 3.89, 3.84, 2.31))
